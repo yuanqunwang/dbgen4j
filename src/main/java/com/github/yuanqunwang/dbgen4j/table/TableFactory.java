@@ -48,6 +48,22 @@ public class TableFactory {
         return db;
     }
 
+    /**
+     * generate a single fake record as map
+     * @param fieldAndDirective
+     * @return generated fake record as map
+     */
+    public Map<String,String> createSingleRecord(Map<String, String> fieldAndDirective){
+        Map<String, String> singleRecord = new HashMap<String, String>(fieldAndDirective);
+        List<String> recordValue = fakeSingleRecord(new ArrayList<String>(fieldAndDirective.values()));
+        Set<String> fields = fieldAndDirective.keySet();
+        int i = 0;
+        for(String field : fields){
+            singleRecord.put(field, recordValue.get(i++));
+        }
+        return singleRecord;
+    }
+
     private ArrayList<String> fakeSingleRecord(List<String> directives){
         int directiveNum = directives.size();
         ArrayList<String> l = new ArrayList<String>(directiveNum);

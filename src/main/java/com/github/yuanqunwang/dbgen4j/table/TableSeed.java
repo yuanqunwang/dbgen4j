@@ -2,10 +2,7 @@ package com.github.yuanqunwang.dbgen4j.table;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +24,12 @@ public class TableSeed{
         return tableName;
     }
 
+    public void updateDirective(String field, String value){
+        fieldAndDirectiveSeed.put(field, value);
+    }
+
     private Map<String, String> commonDirective(TableFactory tableFactory){
-        Map<String, String> fieldAndDirective = new HashMap<String, String>(fieldAndDirectiveSeed);
+        Map<String, String> fieldAndDirective = new LinkedHashMap<String, String>(fieldAndDirectiveSeed);
         Map<String, List<String>> directiveAndField = new HashMap<String, List<String>>();
 
         for(String field : fieldAndDirective.keySet()){

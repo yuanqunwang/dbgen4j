@@ -6,6 +6,7 @@ import com.github.yuanqunwang.dbgen4j.seed.Sfck;
 import com.github.yuanqunwang.dbgen4j.table.Table;
 import com.github.yuanqunwang.dbgen4j.table.TableFactory;
 import com.github.yuanqunwang.dbgen4j.table.TableSeed;
+import com.github.yuanqunwang.dbgen4j.table.TableSeedBundle;
 import com.github.yuanqunwang.dbgen4j.utils.YamlUtil;
 
 import java.util.*;
@@ -67,17 +68,6 @@ public class Wlck {
         tableFactory = new TableFactory(faker);
     }
 
-
-    class TableSeedBundle{
-        List<TableSeed> tableSeeds;
-        int recordNum;
-
-        TableSeedBundle(List<TableSeed> tableSeeds, int recordNum){
-            this.tableSeeds = tableSeeds;
-            this.recordNum = recordNum;
-        }
-    }
-
     class TableBundle{
         List<Table> tables;
         Set<String> commonKeys;
@@ -125,11 +115,9 @@ public class Wlck {
     private void generateTable(){
         for(TableSeedBundle tableSeedBundle : tableSeedsBundles){
             tables = new LinkedList<Table>();
-            for(TableSeed tableSeed : tableSeedBundle.tableSeeds){
-//                System.out.println(tableSeed);
-//                tableSeed.commonDirective();
-//                System.out.println(tableSeed);
-                Table table = tableFactory.createTable(tableSeed, tableSeedBundle.recordNum);
+            List<TableSeed> tableSeedList = tableSeedBundle.nextTableSeedBundle(tableFactory);
+            for(TableSeed tableSeed : tableSeedList){
+                Table table = tableFactory.createTable(tableSeed, tableSeedBundle.getRecordNum());
                 tables.add(table);
             }
             tableBundles.add(new TableBundle(tables));
@@ -148,10 +136,6 @@ public class Wlck {
             }
         }
     }
-
-
-
-
 
 
     public List<TableBundle> getTableBundles(){
