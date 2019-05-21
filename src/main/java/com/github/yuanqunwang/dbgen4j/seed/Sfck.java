@@ -9,7 +9,7 @@ public class Sfck {
         this.faker = faker;
     }
 
-    public String id_type(){
+    public String idType(){
         return this.faker.resolve("sfck.id_type");
     }
 
@@ -21,11 +21,11 @@ public class Sfck {
         return this.faker.resolve("sfck.cxlx");
     }
 
-    public String bank_code(){
+    public String bankCode(){
         return this.faker.resolve("sfck.bank_code");
     }
 
-    public String org_code(){
+    public String orgCode(){
         return this.faker.resolve("sfck.org_code");
     }
 }

@@ -5,14 +5,14 @@ import java.util.*;
 public class Table {
     private String tableName;
     private List<String> fields;
-    private List<? extends List<String>> records;
+    private List<ArrayList<String>> records;
     private Map<String, Integer> fieldsIndex;
 
     public Table(String tableName, List<String> fields) {
-        this(tableName, fields, new LinkedList<List<String>>());
+        this(tableName, fields, new LinkedList<ArrayList<String>>());
     }
 
-    public Table(String tableName, List<String> fields, List<? extends List<String>> records){
+    public Table(String tableName, List<String> fields, List<ArrayList<String>> records){
         this.tableName = tableName;
         this.fields = fields;
         this.records =records;
@@ -27,9 +27,9 @@ public class Table {
         }
     }
 
-//    public void insert(ArrayList<String> record) {
-//        records.add(record);
-//    }
+    public void insert(ArrayList<String> record) {
+        records.add(record);
+    }
 
     public String toString() {
         StringBuilder sbSql = new StringBuilder();
@@ -82,6 +82,20 @@ public class Table {
 
     public List<? extends List<String>> getRecords() {
         return records;
+    }
+
+    public List<String> getSingleRecord(int recordIndex){
+        if(recordIndex < 0 || recordIndex >= records.size()){
+            throw new IndexOutOfBoundsException("recordIndex:" + recordIndex);
+        }
+        return records.get(recordIndex);
+    }
+
+
+    public String getSpecificField(int recordIndex, String field){
+        List<String> record = getSingleRecord(recordIndex);
+        Integer recordPosition = fieldsIndex.get(field);
+        return record.get(recordPosition);
     }
 
     /**

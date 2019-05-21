@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -20,7 +21,7 @@ public class SfckTest {
     @Before
     public void before(){
         faker = new Faker(new Locale("zh-CN"));
-        FakeSeed fakeSeed = new FakeSeed("sfck", Sfck.class);
+        FakeSeed fakeSeed = new FakeSeed("seed/sfck.yml", Sfck.class);
         faker.addFakeSeed(fakeSeed);
         getTable();
     }
@@ -28,22 +29,22 @@ public class SfckTest {
     @Test
     public void getTable(){
         Map<String, String> fieldsAndDirectives = new LinkedHashMap<String, String>();
-//        fieldsAndDirectives.put("city", "#{address.city}");
-        fieldsAndDirectives.put("cell_phone", "#{phoneNumber.cellPhone}");
-//        fieldsAndDirectives.put("name", "#{Name.name}");
+        fieldsAndDirectives.put("city", "#{Address.city}");
+        fieldsAndDirectives.put("name", "#{Name.name}");
+        fieldsAndDirectives.put("cell_phone", "#{PhoneNumber.cellphone}");
         fieldsAndDirectives.put("book", "#{Book.title}-#{phoneNumber.cellPhone}-#{phoneNumber.cellPhone}-#{phoneNumber.cellPhone}");
         fieldsAndDirectives.put("app", "#{app.name}-#{phoneNumber.cellPhone}");
         fieldsAndDirectives.put("university", "#{university.name}-#{phoneNumber.cellPhone}");
-        fieldsAndDirectives.put("cxlx", "#{sfck.cxlx}-#{phoneNumber.cellPhone}");
-        fieldsAndDirectives.put("id_type", "#{sfck.id_type}");
-        fieldsAndDirectives.put("org_code", "#{sfck.org_code}");
-        fieldsAndDirectives.put("bank_code", "#{sfck.bank_code}");
+        fieldsAndDirectives.put("cxlx", "#{Sfck.cxlx}-#{PhoneNumber.cellPhone}");
+        fieldsAndDirectives.put("cxlx", "#{Sfck.cxlx}#{Name.name}");
+        fieldsAndDirectives.put("id_type", "#{Sfck.idType}");
+        fieldsAndDirectives.put("org_code", "#{Sfck.orgCode}");
+        fieldsAndDirectives.put("bank_code", "#{Sfck.bankCode}");
         fieldsAndDirectives.put("file","#{File.extension}");
-//        fieldsAndDirectives.put("job","#{Job.title}");
-//        fieldsAndDirectives.put("dateandtime","#{DateAndTime.between '20180401','20190516'}");
-        fieldsAndDirectives.put("dateAndTime", "#{dateAndTime.dateAndTime 'yyyy年MM月dd日-HH:mm:ss'}");
+        fieldsAndDirectives.put("job","#{Job.title}");
+        fieldsAndDirectives.put("dateandtime","#{DateAndTime.birthday '18','35'}");
+//        fieldsAndDirectives.put("dateAndTime", "#{dateAndTime.dateAndTime 'yyyy年MM月dd日-HH:mm:ss'}");
 
-//        DBGen dbGen = new DBGen(seed, fieldsAndDirectives);
 
         TableFactory tableFactory = new TableFactory(faker);
         TableSeed tableSeed = new TableSeed("testTable", fieldsAndDirectives);
@@ -105,6 +106,21 @@ public class SfckTest {
         }
         System.out.println("after update:");
         System.out.println(table.toString());
+    }
+
+
+
+    @Test
+    public void testMatcher(){
+         Pattern EXPRESSION_PATTERN = Pattern.compile("#\\{([a-z0-9A-Z_.]+)\\s?(?:'([^']+)')?(?:,'([^']+)')*\\}");
+         String teststr = "#{Sfck.cxlx}112332-#{phoneNumber.cellPhone}";
+         if(EXPRESSION_PATTERN.matcher(teststr).find()){
+             System.out.println("Matches");
+         }else {
+             System.out.println("not Matche");
+         }
+
+
     }
 
 

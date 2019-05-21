@@ -28,6 +28,10 @@ public class TableSeed{
         fieldAndDirectiveSeed.put(field, value);
     }
 
+    public List<String> getFields(){
+        return new ArrayList<String>(this.fieldAndDirectiveSeed.keySet());
+    }
+
     private Map<String, String> commonDirective(TableFactory tableFactory){
         Map<String, String> fieldAndDirective = new LinkedHashMap<String, String>(fieldAndDirectiveSeed);
         Map<String, List<String>> directiveAndField = new HashMap<String, List<String>>();

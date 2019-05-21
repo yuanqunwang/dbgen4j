@@ -3,15 +3,24 @@ package com.github.yuanqunwang.dbgen4j.table;
 import java.util.*;
 
 /**
- * TableSeed that has relation
+ * multi {@Link TableSeed} having relation to each other
  */
-public class TableSeedBundle{
-    List<TableSeed> tableSeeds;
-    int recordNum;
+public class TableSeedBundle extends ArrayList<TableSeed> {
+    private int recordNum;
 
-    public TableSeedBundle(List<TableSeed> tableSeeds, int recordNum){
-        this.tableSeeds = tableSeeds;
+    public TableSeedBundle(int recordNum){
+        super();
         this.recordNum = recordNum;
+    }
+
+    public TableSeedBundle(List<TableSeed> tableSeedList, int recordNum){
+        super(tableSeedList);
+        this.recordNum = recordNum;
+    }
+
+
+    public List<TableSeed> getTableSeeds(){
+        return this;
     }
 
 
@@ -20,8 +29,8 @@ public class TableSeedBundle{
     }
 
     private List<TableSeed> populateCommonField(TableFactory tableFactory){
-        List<TableSeed> tableSeeds = new ArrayList<TableSeed>(this.tableSeeds.size());
-        for(TableSeed tableSeed : this.tableSeeds){
+        List<TableSeed> tableSeeds = new ArrayList<TableSeed>(size());
+        for(TableSeed tableSeed : this){
             tableSeeds.add(new TableSeed(tableSeed.getTableName(),tableSeed.getFieldAndDirective(tableFactory)));
         }
 

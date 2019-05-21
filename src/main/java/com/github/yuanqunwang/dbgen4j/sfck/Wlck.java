@@ -43,7 +43,7 @@ public class Wlck {
                 tableSeeds.addAll(getTableSeeds(wlck, "public"));
                 tableSeeds.add(new TableSeed(tableName, (Map<String, String>) specificTableSeeds.get(tableName)));
 
-                this.tableSeedsBundles.add(new TableSeedBundle(tableSeeds, recordNum));
+                this.tableSeedsBundles.add(new TableSeedBundle(recordNum));
 
             }
         }
@@ -63,7 +63,7 @@ public class Wlck {
 
     private void initFakerAndTableFactory(){
         faker = new Faker(new Locale("zh-CN"));
-        FakeSeed fakeSeed = new FakeSeed("sfck", Sfck.class);
+        FakeSeed fakeSeed = new FakeSeed("seed/sfck.yml", Sfck.class);
         faker.addFakeSeed(fakeSeed);
         tableFactory = new TableFactory(faker);
     }
@@ -123,6 +123,17 @@ public class Wlck {
             tableBundles.add(new TableBundle(tables));
         }
     }
+
+
+    private List<Table> createTable(List<TableSeed> tableSeedList){
+        for(TableSeed tableSeed : tableSeedList){
+//            Table table = tableFactory.createTable(tableSeed.getTableName(), tableSeed.getFieldAndDirective(tableFactory));
+        }
+        return null;
+    }
+
+
+
 
     private void meaningfulTable(){
         int i = 0;
