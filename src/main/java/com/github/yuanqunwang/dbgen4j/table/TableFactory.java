@@ -1,11 +1,9 @@
 package com.github.yuanqunwang.dbgen4j.table;
 
 import com.github.javafaker.Faker;
-import org.apache.commons.lang3.StringUtils;
+import com.github.yuanqunwang.dbgen4j.utils.MapUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TableFactory {
     private final Faker faker;
@@ -69,8 +67,46 @@ public class TableFactory {
      */
     public List<Table> createTableBundle(){
         List<Table> tableList = createTables();
+        fillTableCommonFields(tableList);
         fillTablesWithMultiRecords(tableList);
+        resolveReferenceValue(tableList);
         return tableList;
+    }
+
+
+
+    /**
+     * fill common fields ( primarily primary key ) with same generated value
+     */
+    private void fillTableCommonFields(List<Table> tableList){
+        int tableNum = this.tableSeedBundle.size();
+        int recordNum = this.tableSeedBundle.getRecordNum();
+        for(int i = 0; i < recordNum; i++){
+            Map<String, String> commonFieldAndDirective = this.tableSeedBundle.getCommonFieldAndDirective();
+            for(int j = 0; j < tableNum; j++){
+                Table table = tableList.get(j);
+                Map<String, String> commonFieldAndValue = createSingleRecord(commonFieldAndDirective);
+                table.update(recordNum, commonFieldAndValue);
+            }
+        }
+    }
+
+    /**
+     * resolve field reference to its referencing field value.
+     */
+    private void resolveReferenceValue(List<Table> tableList){
+        int tableNum = this.tableSeedBundle.size();
+        int recordNum = this.tableSeedBundle.getRecordNum();
+        for(int i = 0; i < recordNum; i++){
+            for(int j = 0; j < tableNum; j++){
+                Table table = tableList.get(j);
+                List<String> field = table.getFields();
+                List<String> record = table.getSingleRecord(recordNum);
+                Map<String, String> fieldAndRecord = MapUtil.mergeMap(field, record);
+                MapUtil.resolveReference(fieldAndRecord);
+                table.update(recordNum, fieldAndRecord);
+            }
+        }
     }
 
     private List<Table> createTables(){

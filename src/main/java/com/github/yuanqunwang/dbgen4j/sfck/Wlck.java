@@ -23,8 +23,9 @@ public class Wlck {
     public Wlck(){
         initFakerAndTableFactory();
         initMessage();
+        tableFactory = new TableFactory(faker, tableSeedsBundles.get(0));
         generateTable();
-        meaningfulTable();
+//        meaningfulTable();
     }
 
     private void initMessage(){
@@ -113,14 +114,9 @@ public class Wlck {
     }
 
     private void generateTable(){
-        for(TableSeedBundle tableSeedBundle : tableSeedsBundles){
-            tables = new LinkedList<Table>();
-            List<TableSeed> tableSeedList = tableSeedBundle.nextTableSeedBundle(tableFactory);
-            for(TableSeed tableSeed : tableSeedList){
-                Table table = tableFactory.createTable(tableSeed, tableSeedBundle.getRecordNum());
-                tables.add(table);
-            }
-            tableBundles.add(new TableBundle(tables));
+        List<Table> tableList = tableFactory.createTableBundle();
+        for(Table table : tableList){
+            System.out.println(table.toString());
         }
     }
 
@@ -160,15 +156,15 @@ public class Wlck {
     public static void main(String[] args){
         Wlck wlck = new Wlck();
         List<TableBundle> tableBundles = wlck.getTableBundles();
-        for(TableBundle tableBundle : tableBundles){
-            for(Table table : tableBundle.tables){
-                System.out.println(table.toString());
-                System.out.println();
-            }
-            System.out.println();
-            System.out.println();
-            System.out.println();
-        }
+//        for(TableBundle tableBundle : tableBundles){
+//            for(Table table : tableBundle.tables){
+//                System.out.println(table.toString());
+//                System.out.println();
+//            }
+//            System.out.println();
+//            System.out.println();
+//            System.out.println();
+//        }
     }
 
 }

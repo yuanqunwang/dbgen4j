@@ -25,7 +25,6 @@ public class TableSeedTest {
     public void initFieldsAndDirectives(){
         fieldsAndDirectives.put("cellphone","#{PhoneNumber.cellPhone}");
         fieldsAndDirectives.put("name", "#{Name.name}");
-
         fieldsAndDirectives.put("book", "#{Book.title}-#{PhoneNumber.cellPhone}#{Name.name}test");
         fieldsAndDirectives.put("app", "#{App.name}-#{PhoneNumber.cellPhone}");
         fieldsAndDirectives.put("university", "#{PhoneNumber.cellPhone}--uni--#{University.name}");
@@ -47,5 +46,10 @@ public class TableSeedTest {
             System.out.println(fieldAndDirective);
             System.out.println();
         }
+    }
+
+    @Test
+    public void testCopy(){
+        TableSeed tableSeed = new TableSeed("tableSeed1", fieldsAndDirectives);
     }
 }

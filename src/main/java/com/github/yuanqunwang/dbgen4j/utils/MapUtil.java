@@ -2,8 +2,7 @@ package com.github.yuanqunwang.dbgen4j.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +50,27 @@ public class MapUtil {
                 keyValue.put(key, referencedValue);
             }
         }
+    }
+
+    /**
+     * merge two lists to a HashMap
+     * @param keys
+     * @param values
+     * @param <K>
+     * @param <V>
+     * @return
+     */
+    public static <K, V> Map<K, V> mergeMap(List<K> keys, List<V> values){
+        int keySize = keys.size();
+        int valueSize = values.size();
+        assert(keySize == valueSize);
+        Map<K, V> kvMap = new LinkedHashMap<K, V>(keySize);
+        for(int i = 0; i < keySize; i++){
+            K key = keys.get(i);
+            V value = values.get(i);
+            kvMap.put(key, value);
+        }
+        return kvMap;
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.*;
  */
 public class TableSeedBundle extends ArrayList<TableSeed> {
     private int recordNum;
+    private Map<String, String> commonFiedlAndDirective;
 
     /**
      * create a empty {@Link TableSeedBundle}
@@ -18,13 +19,14 @@ public class TableSeedBundle extends ArrayList<TableSeed> {
         this.recordNum = recordNum;
     }
 
+
     /**
      * create a {@Link TableSeedBundle} with a List of TableSeed and recordNum
      * @param tableSeedList representing a List of {@Link TableSeed}
      * @param recordNum record number each table has
      */
     public TableSeedBundle(List<TableSeed> tableSeedList, int recordNum){
-        super(tableSeedList);
+        super(Collections.unmodifiableCollection(tableSeedList));
         this.recordNum = recordNum;
     }
 
@@ -40,24 +42,24 @@ public class TableSeedBundle extends ArrayList<TableSeed> {
     }
 
     private List<TableSeed> populateCommonField(TableFactory tableFactory){
-        List<TableSeed> tableSeeds = new ArrayList<TableSeed>(size());
+        List<TableSeed> tableSeeds = new ArrayList<TableSeed>();
         for(TableSeed tableSeed : this){
-            tableSeeds.add(new TableSeed(tableSeed.getTableName(),tableSeed));
+            tableSeeds.add(tableSeed);
         }
 
-        Map<String, String> commonFieldAndDirectives = getCommonFieldAndDirective();
-        Map<String, String> commonFieldAndValues = tableFactory.createSingleRecord(commonFieldAndDirectives);
-
-        for(TableSeed tableSeed : tableSeeds){
-            Set<String> commonFields = commonFieldAndValues.keySet();
-            for(String commonField : commonFields){
-                tableSeed.updateDirective(commonField, commonFieldAndValues.get(commonField));
-            }
-        }
+//        Map<String, String> commonFieldAndDirectives = getCommonFieldAndDirective();
+////        Map<String, String> commonFieldAndValues = tableFactory.createSingleRecord(commonFieldAndDirectives);
+////
+////        for(TableSeed tableSeed : tableSeeds){
+////            Set<String> commonFields = commonFieldAndValues.keySet();
+////            for(String commonField : commonFields){
+////                tableSeed.updateDirective(commonField, commonFieldAndValues.get(commonField));
+////            }
+////        }
         return tableSeeds;
     }
 
-    private Map<String, String> getCommonFieldAndDirective(){
+    public Map<String, String> getCommonFieldAndDirective(){
         /*
          * find common fields
          */
