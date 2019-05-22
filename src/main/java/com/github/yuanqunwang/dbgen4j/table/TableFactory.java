@@ -1,8 +1,11 @@
 package com.github.yuanqunwang.dbgen4j.table;
 
 import com.github.javafaker.Faker;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TableFactory {
     private final Faker faker;
@@ -44,7 +47,7 @@ public class TableFactory {
 
     public Table createTable(TableSeed tableSeed, int recordNum){
         List<ArrayList<String>> records = fakeMultiRecords(tableSeed, recordNum);
-        return new Table(tableSeed.getTableName(), new ArrayList<String>(tableSeed.getFieldAndDirective(this).keySet()), records);
+        return new Table(tableSeed.getTableName(), new ArrayList<String>(tableSeed.keySet()), records);
     }
 
     /**
@@ -77,7 +80,7 @@ public class TableFactory {
         for(int i = 0; i < tableNum; i++){
             TableSeed tableSeed = tableSeedBundle.get(i);
             String tableName = tableSeed.getTableName();
-            List<String> fields = new ArrayList<String>(tableSeed.getFields());
+            List<String> fields = new ArrayList<String>(tableSeed.keySet());
             Table table = new Table(tableName, fields);
             tableList.add(table);
         }
@@ -98,7 +101,7 @@ public class TableFactory {
         for(int i = 0; i < tableNum; i++){
             Table table = tableList.get(i);
             TableSeed tableSeed = tableSeedList.get(i);
-            List<String> directives = new ArrayList<String>(tableSeed.getFieldAndDirective(this).values());
+            List<String> directives = new ArrayList<String>(tableSeed.nextDirective(this));
             ArrayList<String> singleRecord = fakeSingleRecord(directives);
             table.insert(singleRecord);
         }
@@ -119,7 +122,7 @@ public class TableFactory {
     private List<ArrayList<String>> fakeMultiRecords(TableSeed tableSeed, int recordNum){
         List<ArrayList<String>> db = new ArrayList<ArrayList<String>>(recordNum);
         for(int i = 0; i < recordNum; i++){
-            List<String> directives = new ArrayList<String>(tableSeed.getFieldAndDirective(this).values());
+            List<String> directives = new ArrayList<String>(tableSeed.nextDirective(this));
             db.add(fakeSingleRecord(directives));
         }
         return db;
@@ -146,7 +149,7 @@ public class TableFactory {
      * @param directives
      * @return
      */
-    private ArrayList<String> fakeSingleRecord(List<String> directives){
+    public ArrayList<String> fakeSingleRecord(List<String> directives){
         int directiveNum = directives.size();
         ArrayList<String> l = new ArrayList<String>(directiveNum);
         for(String directive : directives){

@@ -8,22 +8,33 @@ import java.util.*;
 public class TableSeedBundle extends ArrayList<TableSeed> {
     private int recordNum;
 
+    /**
+     * create a empty {@Link TableSeedBundle}
+     * by calling {@Link List}'s add method to add {@Link TableSeed}
+     * @param recordNum
+     */
     public TableSeedBundle(int recordNum){
         super();
         this.recordNum = recordNum;
     }
 
+    /**
+     * create a {@Link TableSeedBundle} with a List of TableSeed and recordNum
+     * @param tableSeedList representing a List of {@Link TableSeed}
+     * @param recordNum record number each table has
+     */
     public TableSeedBundle(List<TableSeed> tableSeedList, int recordNum){
         super(tableSeedList);
         this.recordNum = recordNum;
     }
 
 
-    public List<TableSeed> getTableSeeds(){
-        return this;
-    }
-
-
+    /**
+     * by making same field having same value
+     * to make {@Link TableSeedBundle} having relation to each other,
+     * @param tableFactory
+     * @return
+     */
     public List<TableSeed> nextTableSeedBundle(TableFactory tableFactory) {
         return populateCommonField(tableFactory);
     }
@@ -31,10 +42,10 @@ public class TableSeedBundle extends ArrayList<TableSeed> {
     private List<TableSeed> populateCommonField(TableFactory tableFactory){
         List<TableSeed> tableSeeds = new ArrayList<TableSeed>(size());
         for(TableSeed tableSeed : this){
-            tableSeeds.add(new TableSeed(tableSeed.getTableName(),tableSeed.getFieldAndDirective(tableFactory)));
+            tableSeeds.add(new TableSeed(tableSeed.getTableName(),tableSeed));
         }
 
-        Map<String, String> commonFieldAndDirectives = getCommonFieldAndDirective(tableFactory, tableSeeds);
+        Map<String, String> commonFieldAndDirectives = getCommonFieldAndDirective();
         Map<String, String> commonFieldAndValues = tableFactory.createSingleRecord(commonFieldAndDirectives);
 
         for(TableSeed tableSeed : tableSeeds){
@@ -46,20 +57,32 @@ public class TableSeedBundle extends ArrayList<TableSeed> {
         return tableSeeds;
     }
 
-    private Map<String, String> getCommonFieldAndDirective(TableFactory tableFactory, List<TableSeed> tableSeeds){
-        Map<String, String> firstFieldAndDirective = tableSeeds.get(0).getFieldAndDirective(tableFactory);
+    private Map<String, String> getCommonFieldAndDirective(){
+        /*
+         * find common fields
+         */
+        Map<String, String> firstFieldAndDirective = get(0);
         Set<String> commonFields = firstFieldAndDirective.keySet();
-        int tableSeedBundleSize = tableSeeds.size();
+        int tableSeedBundleSize = size();
         for(int i = 1; i < tableSeedBundleSize; i++){
-            commonFields.retainAll(tableSeeds.get(i).getFieldAndDirective(tableFactory).keySet());
+            commonFields.retainAll(get(i).keySet());
         }
 
+        /*
+         * fill common fields with corresponding directive
+         */
         Map<String, String> commonFieldAndDirectives = new HashMap<String, String>(commonFields.size());
         for(String commonField : commonFields){
             commonFieldAndDirectives.put(commonField, firstFieldAndDirective.get(commonField));
         }
         return commonFieldAndDirectives;
     }
+//
+//    private void getCommonDirectivesInTableSeedBundle(){
+//        for(TableSeed tableSeed : this){
+//            Map<String, List<String>>
+//        }
+//    }
 
     public int getRecordNum() {
         return recordNum;
