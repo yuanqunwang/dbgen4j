@@ -1,5 +1,7 @@
 package com.github.yuanqunwang.dbgen4j.table;
 
+import com.github.yuanqunwang.dbgen4j.utils.MapUtil;
+
 import java.util.*;
 
 public class Table {
@@ -153,5 +155,13 @@ public class Table {
             sb.append(quotation);
         }
         return sb.toString();
+    }
+
+    public void resolveReference(int recordIndex){
+        List<String> field = this.getFields();
+        List<String> record = this.getSingleRecord(recordIndex);
+        Map<String, String> fieldAndRecord = MapUtil.mergeMap(field, record);
+        fieldAndRecord = MapUtil.resolveReference(fieldAndRecord);
+        this.update(recordIndex,fieldAndRecord);
     }
 }

@@ -39,7 +39,7 @@ public class MapUtil {
      * resolve all the reference and update corresponding value
      * @param keyValue
      */
-    public static void resolveReference(Map<String, String> keyValue){
+    public static Map<String, String> resolveReference(Map<String, String> keyValue){
         Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9]+)\\}");
         Set<String> keySet = keyValue.keySet();
         for(String key : keySet){
@@ -50,6 +50,7 @@ public class MapUtil {
                 keyValue.put(key, referencedValue);
             }
         }
+        return keyValue;
     }
 
     /**

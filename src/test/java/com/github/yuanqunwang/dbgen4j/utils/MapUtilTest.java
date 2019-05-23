@@ -32,35 +32,6 @@ public class MapUtilTest {
         System.out.println(fieldsAndDirectives);
     }
 
-    @Test
-    public void testList(){
-        List<String> list1 = new ArrayList<String>();
-        list1.add("good1");
-        list1.add("good2");
-        list1.add("good3");
-        list1.add("good4");
-        list1.add("good5");
-        List<String> list2 = new ArrayList<String>(list1);
-
-        list2.set(0, "good1");
-        int size = list1.size();
-        for(int i = 0; i < size; i++){
-            System.out.println(list1.get(i) == list2.get(i));
-        }
-        System.out.println(list1);
-    }
-
-
-    @Test
-    public void testMap(){
-        Map<String, String> mapCopy = new LinkedHashMap<String, String>(fieldsAndDirectives);
-        mapCopy.put("book", "put from mapCopy");
-        String mapBook = fieldsAndDirectives.get("book");
-        String mapCopyBook = mapCopy.get("book");
-        System.out.println(fieldsAndDirectives);
-        System.out.println(mapCopy);
-        assert(mapBook.equals(mapCopyBook));
-    }
 
 
     @Test

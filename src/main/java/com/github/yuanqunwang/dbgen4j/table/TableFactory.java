@@ -1,201 +1,113 @@
 package com.github.yuanqunwang.dbgen4j.table;
 
-import com.github.javafaker.Faker;
-import com.github.yuanqunwang.dbgen4j.utils.MapUtil;
 
+import com.github.yuanqunwang.dbgen4j.utils.FakerUtil;
 import java.util.*;
+import java.util.regex.Pattern;
+
+/**
+ * <p>
+ * This class is the factory of the {@Link Table}.
+ * A Table Factory can be constructed by given:
+ * <ul>
+ *     <li>Field: representing the table field.</li>
+ *     <li>Directive: sources of the generated fake values.</li>
+ * </ul>
+ * so far, directives have the following form
+ * <ul>
+ *     <li>"#{Address.city}", representing the java-faker's method {@Link Address#city()}</li>
+ *     <li>
+ *         "@{reference_field}", representing referenced field value in the same table,
+ *         it's useful when a field's value depends on other fields's value in the same table.
+ *     </li>
+ *     <li>any characters</li>
+ *     <li>above three forms combined</li>
+ * </ul>
+ *
+ */
+
+
+
+
 
 public class TableFactory {
-    private final Faker faker;
-    private final TableSeedBundle tableSeedBundle;
+    private final TableSeed tableSeed;
 
-    public TableFactory(){
-        this(new Faker());
+    /**
+     * @param tableName table name
+     * @param fieldAndDirectives fields and directives key-value pairs, sources of the generated fake value table
+     */
+    public TableFactory(String tableName, Map<String, String> fieldAndDirectives){
+        this.tableSeed = new TableSeed(tableName, fieldAndDirectives);
     }
 
     /**
-     * constructor for
-     * @param faker
+     * generate fake value table, but field references not revolved.
+     * @param recordLen length of the generated fake values;
+     * @return  a {@Link Table} whose field are not resolved
      */
-    public TableFactory(Faker faker){
-        this.faker = faker;
-        this.tableSeedBundle = null;
-    }
-
-    /**
-     * constructor for multi tables having relation to each other
-     * @param faker
-     * @param tableSeedBundle
-     */
-    public TableFactory(Faker faker, TableSeedBundle tableSeedBundle){
-        this.faker = faker;
-        this.tableSeedBundle = tableSeedBundle;
-    }
-
-    /**
-     * Constructor for single table
-     * @param faker
-     * @param tableSeed
-     */
-    public TableFactory(Faker faker, TableSeed tableSeed, int recordNum){
-        this.faker = faker;
-        this.tableSeedBundle = new TableSeedBundle(recordNum);
-        this.tableSeedBundle.add(tableSeed);
-    }
-
-    public Table createTable(TableSeed tableSeed, int recordNum){
-        List<ArrayList<String>> records = fakeMultiRecords(tableSeed, recordNum);
+    Table createNotResolvedTable(int recordLen){
+        List<ArrayList<String>> records = fakeMultiRecords(new ArrayList<String>(tableSeed.values()), recordLen);
         return new Table(tableSeed.getTableName(), new ArrayList<String>(tableSeed.keySet()), records);
     }
 
     /**
-     * only called by {@Link TableSeed}, call above one to make sure generate different field.
-     * @param tableName {@Link String}
-     * @param fieldAndDirective
-     * @param recordNum
-     * @return
+     * generate fake value table, field references also revolved.
+     * @param recordLen length of the generated fake values;
+     * @return a {@Link Table} whose field are properly resolved
      */
-    public Table createTable(String tableName, Map<String, String> fieldAndDirective, int recordNum){
-        List<ArrayList<String>> records = fakeMultiRecords(new ArrayList<String>(fieldAndDirective.values()), recordNum);
-        return new Table(tableName, new ArrayList<String>(fieldAndDirective.keySet()), records);
-    }
-
-    /**
-     * create multi tables having relation to each other
-     * and fill each table with certain recordNum.
-     * @return
-     */
-    public List<Table> createTableBundle(){
-        List<Table> tableList = createTables();
-        fillTableCommonFields(tableList);
-        fillTablesWithMultiRecords(tableList);
-        resolveReferenceValue(tableList);
-        return tableList;
-    }
-
-
-
-    /**
-     * fill common fields ( primarily primary key ) with same generated value
-     */
-    private void fillTableCommonFields(List<Table> tableList){
-        int tableNum = this.tableSeedBundle.size();
-        int recordNum = this.tableSeedBundle.getRecordNum();
-        for(int i = 0; i < recordNum; i++){
-            Map<String, String> commonFieldAndDirective = this.tableSeedBundle.getCommonFieldAndDirective();
-            for(int j = 0; j < tableNum; j++){
-                Table table = tableList.get(j);
-                Map<String, String> commonFieldAndValue = createSingleRecord(commonFieldAndDirective);
-                table.update(recordNum, commonFieldAndValue);
-            }
-        }
-    }
-
-    /**
-     * resolve field reference to its referencing field value.
-     */
-    private void resolveReferenceValue(List<Table> tableList){
-        int tableNum = this.tableSeedBundle.size();
-        int recordNum = this.tableSeedBundle.getRecordNum();
-        for(int i = 0; i < recordNum; i++){
-            for(int j = 0; j < tableNum; j++){
-                Table table = tableList.get(j);
-                List<String> field = table.getFields();
-                List<String> record = table.getSingleRecord(recordNum);
-                Map<String, String> fieldAndRecord = MapUtil.mergeMap(field, record);
-                MapUtil.resolveReference(fieldAndRecord);
-                table.update(recordNum, fieldAndRecord);
-            }
-        }
-    }
-
-    private List<Table> createTables(){
-        int tableNum = tableSeedBundle.size();
-        List<Table> tableList = new ArrayList<Table>(tableNum);
-
-        for(int i = 0; i < tableNum; i++){
-            TableSeed tableSeed = tableSeedBundle.get(i);
-            String tableName = tableSeed.getTableName();
-            List<String> fields = new ArrayList<String>(tableSeed.keySet());
-            Table table = new Table(tableName, fields);
-            tableList.add(table);
-        }
-        return tableList;
-    }
-
-
-    private void fillTablesWithMultiRecords(List<Table> tableList){
-        int recordLen = tableSeedBundle.getRecordNum();
+    public Table createTable(int recordLen){
+        Table table = createNotResolvedTable(recordLen);
         for(int i = 0; i < recordLen; i++){
-            List<TableSeed> tableSeedList = tableSeedBundle.nextTableSeedBundle(this);
-            fillTablesWithSingleRecord(tableList, tableSeedList);
+            table.resolveReference(i);
         }
-    }
-
-    private void fillTablesWithSingleRecord(List<Table> tableList, List<TableSeed> tableSeedList){
-        int tableNum = tableList.size();
-        for(int i = 0; i < tableNum; i++){
-            Table table = tableList.get(i);
-            TableSeed tableSeed = tableSeedList.get(i);
-            List<String> directives = new ArrayList<String>(tableSeed.nextDirective(this));
-            ArrayList<String> singleRecord = fakeSingleRecord(directives);
-            table.insert(singleRecord);
-        }
-    }
-
-
-
-
-
-    private List<ArrayList<String>> fakeMultiRecords(List<String> directives, int recordNum){
-        List<ArrayList<String>> db = new ArrayList<ArrayList<String>>(recordNum);
-        for(int i = 0; i < recordNum; i++){
-            db.add(fakeSingleRecord(directives));
-        }
-        return db;
-    }
-
-    private List<ArrayList<String>> fakeMultiRecords(TableSeed tableSeed, int recordNum){
-        List<ArrayList<String>> db = new ArrayList<ArrayList<String>>(recordNum);
-        for(int i = 0; i < recordNum; i++){
-            List<String> directives = new ArrayList<String>(tableSeed.nextDirective(this));
-            db.add(fakeSingleRecord(directives));
-        }
-        return db;
+        return table;
     }
 
     /**
-     * generate a single fake record as map
-     * @param fieldAndDirective
-     * @return generated fake record as map
+     * use {@Link FakeUtil#genFakeValueList()} to generate list of values
      */
-    public Map<String,String> createSingleRecord(Map<String, String> fieldAndDirective){
-        Map<String, String> singleRecord = new HashMap<String, String>(fieldAndDirective);
-        List<String> recordValue = fakeSingleRecord(new ArrayList<String>(fieldAndDirective.values()));
-        Set<String> fields = fieldAndDirective.keySet();
-        int i = 0;
-        for(String field : fields){
-            singleRecord.put(field, recordValue.get(i++));
+    private List<ArrayList<String>> fakeMultiRecords(List<String> directives, int recordLen){
+        List<ArrayList<String>> records = new ArrayList<ArrayList<String>>(recordLen);
+        for(int i = 0; i < recordLen; i++){
+            records.add(FakerUtil.genFakeValueList(directives));
         }
-        return singleRecord;
+        return records;
     }
 
     /**
-     * fillTablesWithMultiRecords a list of fake record
-     * @param directives
-     * @return
+     * encapsulation of fieldAndDirective {@Link Map}
      */
-    public ArrayList<String> fakeSingleRecord(List<String> directives){
-        int directiveNum = directives.size();
-        ArrayList<String> l = new ArrayList<String>(directiveNum);
-        for(String directive : directives){
-            String resolved = faker.expression(directive);
-            String result = resolved == null ? "" : resolved;
-            l.add(result);
+   static class TableSeed extends LinkedHashMap<String, String>{
+        /*
+         * regular expression representing directive that can generate fake value by calling Faker's expression(directive) method
+         */
+        private final Pattern EXPRESSION_PATTERN = Pattern.compile("#\\{([a-z0-9A-Z_.]+)\\s?(?:'([^']+)')?(?:,'([^']+)')*\\}");
+        private String tableName;
+
+        /**
+         * construct a {@Link TableSeed} with tableName and fieldAndDirective
+         */
+        TableSeed(String tableName, Map<String, String> fieldAndDirective){
+            super(Collections.unmodifiableMap(fieldAndDirective));
+            this.tableName =  tableName;
         }
-        return l;
+
+        String getTableName() {
+            return tableName;
+        }
+
+
+        /**
+         * field index in map
+         */
+        private Map<String, Integer> initFieldIndex(){
+            Map<String, Integer> fieldIndex = new HashMap<String, Integer>(this.keySet().size());
+            int index = 0;
+            for(String field : this.keySet()){
+                fieldIndex.put(field, index++);
+            }
+            return fieldIndex;
+        }
     }
-
-
-
 }
