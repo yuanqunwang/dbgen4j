@@ -1,15 +1,44 @@
 package com.github.yuanqunwang.dbgen4j.utils;
 
 import com.github.javafaker.Faker;
+import com.github.javafaker.service.FakeSeed;
 
 import java.util.*;
 
+/**
+ * use java-faker to generate fake values.
+ */
+
+
+
 public class FakerUtil {
     private static Faker faker;
+
+
+    /**
+     * init Faker instance
+     * and add custom defined fake object to it.
+     */
     static {
-        faker = new Faker(new Locale("zh-CN"));
-//        FakeSeed fakeSeed = new FakeSeed("seed/sfck.yml", Sfck.class);
-//        faker.addFakeSeed(fakeSeed);
+        Map<String, Object> fakerConfig = YamlUtil.loadValues("faker-config.yml");
+        String language = (String) fakerConfig.get("language");
+        if(language == null){
+            language = "en-US";
+        }
+        faker = new Faker(new Locale(language));
+
+        Map<String, String> customDefined = (Map<String, String>)fakerConfig.get("custom_defined");
+        Set<String> clazzs = customDefined.keySet();
+        for(String clazz : clazzs){
+            String seedYml = customDefined.get(clazz);
+            try {
+                Class<?> c = Class.forName(clazz);
+                FakeSeed fakeSeed = new FakeSeed(seedYml, c);
+                faker.addFakeSeed(fakeSeed);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

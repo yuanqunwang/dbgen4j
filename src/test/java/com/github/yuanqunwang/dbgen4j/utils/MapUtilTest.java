@@ -78,12 +78,14 @@ public class MapUtilTest {
 
 
         System.out.println(map);
-
-
-
-
-
     }
 
-
+    @Test
+    public void retainMapTest(){
+        String[] keys = {"book", "app", "name"};
+        Map<String, String> map = MapUtil.getRetainMap(fieldsAndDirectives, Arrays.asList(keys));
+        Set<String> mapKeys = map.keySet();
+        assert(mapKeys.containsAll(Arrays.asList(keys)));
+        System.out.println(map);
+    }
 }

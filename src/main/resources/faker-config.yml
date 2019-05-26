@@ -1,0 +1,6 @@
+# Faker config file, custom defined Fake object should provide
+# full class name and corresponding configure yml file
+
+language: zh-CN
+custom_defined:
+  com.github.yuanqunwang.dbgen4j.seed.Rock: seed/rock.yml

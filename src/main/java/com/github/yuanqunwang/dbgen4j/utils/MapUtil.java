@@ -11,9 +11,6 @@ public class MapUtil {
      * a key's value determined by other key's value
      * key reference have the form of '@{referencedKey1}'
      * after resolving, this function will return value of the reference key combined.
-     * @param keyValue
-     * @param reference
-     * @return
      */
     public static String resolveFieldReference(Map<String, String> keyValue, String reference){
         Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9]+)\\}");
@@ -37,7 +34,6 @@ public class MapUtil {
 
     /**
      * resolve all the reference and update corresponding value
-     * @param keyValue
      */
     public static Map<String, String> resolveReference(Map<String, String> keyValue){
         Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9]+)\\}");
@@ -55,11 +51,6 @@ public class MapUtil {
 
     /**
      * merge two lists to a HashMap
-     * @param keys
-     * @param values
-     * @param <K>
-     * @param <V>
-     * @return
      */
     public static <K, V> Map<K, V> mergeMap(List<K> keys, List<V> values){
         int keySize = keys.size();
@@ -74,4 +65,15 @@ public class MapUtil {
         return kvMap;
     }
 
+    public static <K, V> Map<K, V> getRetainMap(Map<K, V> map, Collection<K> keys){
+        Set<K> mapKey = map.keySet();
+        mapKey.retainAll(keys);
+
+        Map<K, V> resultMap = new HashMap<K, V>();
+        for(K k : mapKey){
+            V mapValue = map.get(k);
+            resultMap.put(k, mapValue);
+        }
+        return resultMap;
+    }
 }

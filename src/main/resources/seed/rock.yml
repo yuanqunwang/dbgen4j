@@ -1,0 +1,15 @@
+faker:
+  rock:
+    igneous_rock: [granite, adakite, andesite, aplite, basalt, basanite, boninite, carbonatite, charnockite, hornblendite]
+    sedimentary_rock: [conglomerate, sandstone, siltstone, mudstone, shale, claystone, limestone, chert, organics, dolostone, iron formation, evaporite, phosphorite]
+    metamorphic_rock: [slate, phyllite, schist, gneiss, hornfels, quartzite, marble, argillite, greenstone, amphibolite, granulite, slate to gneiss, mylonite]
+    texture: [granulitic, fissile, jointed, mylonitic, orthocumulate, sandy]
+    color: [grayish green, yellowish gray, pale red, moderate pink, very dark red, light brown, dusky yellow]
+    rock:
+      - "#{Rock.igneousRock}"
+      - "#{Rock.sedimentaryRock}"
+      - "#{Rock.metamorphicRock}"
+    full_desc:
+      - "#{Rock.texture}-#{Rock.rock}"
+      - "#{Rock.color}-#{Rock.rock}"
+      - "#{Rock.color}-#{Rock.texture}-#{Rock.rock}"

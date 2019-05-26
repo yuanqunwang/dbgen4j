@@ -26,21 +26,20 @@ public class TableBundleFactory {
             Table table = tableFactory.createNotResolvedTable(recordLen);
             tableList.add(table);
         }
-        makeCommonFieldSame(tableList, recordLen);
+        makeCommonFieldSameAndResolveReference(tableList, recordLen);
         return new TableBundle(tableList, recordLen);
     }
 
-    private void makeCommonFieldSame(List<Table> tableList, int recordLen){
+    private void makeCommonFieldSameAndResolveReference(List<Table> tableList, int recordLen){
         Map<String, String> commonFieldAndDirective = this.tableSeedBundle.getCommonFieldAndDirective();
         for(int i = 0; i < recordLen; i++){
         Map<String, String> commonFieldAndValue = FakerUtil.genFakeKeyValueMap(commonFieldAndDirective);
             for(Table table : tableList){
-                table.update(i, commonFieldAndValue);
+                table.updateRecord(i, commonFieldAndValue);
                 table.resolveReference(i);
             }
         }
     }
-
 
     /**
      * multi {@Link TableSeed} having relation to each other
@@ -55,8 +54,6 @@ public class TableBundleFactory {
         TableSeedBundle(List<TableFactory.TableSeed> tableSeedList){
             super(Collections.unmodifiableCollection(tableSeedList));
         }
-
-
 
         Map<String, String> getCommonFieldAndDirective(){
             /*

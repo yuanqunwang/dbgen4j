@@ -4,32 +4,43 @@ import com.github.yuanqunwang.dbgen4j.utils.MapUtil;
 
 import java.util.*;
 
+/**
+ * a class mapping to a table in relation database.
+ * fieldAndIndex representing the table fields and its corresponding position as a key-value map
+ */
+
+
+
+
 public class Table {
     private String tableName;
-    private List<String> fields;
+    private Map<String, Integer> fieldsAndIndex;
     private List<ArrayList<String>> records;
-    private Map<String, Integer> fieldsIndex;
 
     public Table(String tableName, List<String> fields) {
         this(tableName, fields, new LinkedList<ArrayList<String>>());
     }
 
     public Table(String tableName, List<String> fields, List<ArrayList<String>> records){
+        check(fields.size(), records);
         this.tableName = tableName;
-        this.fields = fields;
+        initFieldAndIndex(fields);
         this.records =records;
-        initFieldIndex();
     }
 
-    private void initFieldIndex(){
-        fieldsIndex = new HashMap<String, Integer>(fields.size());
-        int index = 0;
-        for(String field : fields){
-            fieldsIndex.put(field, index++);
-        }
-    }
 
+
+    /**
+     * insert a record to table.
+     * @param record
+     */
     public void insert(ArrayList<String> record) {
+        int providedFieldNum = record.size();
+        int tableFieldNum = fieldsAndIndex.size();
+        if(providedFieldNum != tableFieldNum){
+            throw new RuntimeException("record number should be of length: " + tableFieldNum
+                    + ", but " + providedFieldNum + " provided.");
+        }
         records.add(record);
     }
 
@@ -47,28 +58,39 @@ public class Table {
         return sbSql.toString();
     }
 
-    public void update(int rowIndex, Map<String, String> map){
+    /**
+     * @param rowIndex indicate the row to be updated
+     * @param map key representing the field, value representing the updated value
+     *            if value is null, this function will not update the specific field.
+     */
+    public void updateRecord(int rowIndex, Map<String, String> map){
         int totalRows = records.size();
         if(rowIndex < 0 || rowIndex >= totalRows){
-            throw new RuntimeException("rowIndex invalid, update table failed,");
+            throw new IndexOutOfBoundsException("rowIndex overflow, update table failed,");
         }
-        List<String> needUpdate = records.get(rowIndex);
-        for(String field : map.keySet()){
-            Integer index = fieldsIndex.get(field);
+        List<String> rowNeededUpdate = records.get(rowIndex);
+        Set<String> fieldNeededUpdate = map.keySet();
+
+        for(String field : fieldNeededUpdate){
+            Integer index = fieldsAndIndex.get(field);
             if(index == null){
-                throw new RuntimeException("not support field: \"" + field + "\" in table " + this.tableName);
+                throw new RuntimeException("field: \"" + field + "\" not supported in table " + this.tableName);
             }
             String value = map.get(field);
             if(value != null){
-                needUpdate.set(index, value);
+                rowNeededUpdate.set(index, value);
             }
         }
     }
 
-    public void updateAll(List<Map<String, String>> records){
-        int recordNum = records.size();
+    public void updateAllRecords(List<Map<String, String>> records){
+        int recordNum = this.records.size();
+        int providedNum = records.size();
+        if(recordNum != providedNum){
+            throw new RuntimeException("updateAllRecord failed, provided record number not right.");
+        }
         for(int i = 0; i < recordNum; i++){
-            update(i, records.get(i));
+            updateRecord(i, records.get(i));
         }
     }
 
@@ -79,7 +101,7 @@ public class Table {
     }
 
     public List<String> getFields() {
-        return fields;
+        return new ArrayList<String>(this.fieldsAndIndex.keySet());
     }
 
     public List<? extends List<String>> getRecords() {
@@ -96,8 +118,22 @@ public class Table {
 
     public String getSpecificField(int recordIndex, String field){
         List<String> record = getSingleRecord(recordIndex);
-        Integer recordPosition = fieldsIndex.get(field);
+        Integer recordPosition = fieldsAndIndex.get(field);
         return record.get(recordPosition);
+    }
+
+    /**
+     * if a field's value is reference other field in the same table,
+     * this function can resolve the value.
+     * reference in the form of "@{referenced_field}"
+     * @param recordIndex
+     */
+    public void resolveReference(int recordIndex){
+        List<String> field = this.getFields();
+        List<String> record = this.getSingleRecord(recordIndex);
+        Map<String, String> fieldAndRecord = MapUtil.mergeMap(field, record);
+        fieldAndRecord = MapUtil.resolveReference(fieldAndRecord);
+        this.updateRecord(recordIndex,fieldAndRecord);
     }
 
     /**
@@ -105,11 +141,12 @@ public class Table {
      * @return
      */
     private String getStringFields() {
+        List<String> fields = new ArrayList<String>(fieldsAndIndex.keySet());
         return mergeFields(fields, "`");
     }
 
     public Map<String, Integer> getFieldsIndex() {
-        return fieldsIndex;
+        return fieldsAndIndex;
     }
 
     /**
@@ -117,7 +154,7 @@ public class Table {
      * @return
      */
     private String getStringRecords() {
-        List<String> rows = new ArrayList<String>(fields.size());
+        List<String> rows = new ArrayList<String>(fieldsAndIndex.size());
         for(List<String> record : records) {
             rows.add(mergeFields(record, "\'"));
         }
@@ -157,11 +194,29 @@ public class Table {
         return sb.toString();
     }
 
-    public void resolveReference(int recordIndex){
-        List<String> field = this.getFields();
-        List<String> record = this.getSingleRecord(recordIndex);
-        Map<String, String> fieldAndRecord = MapUtil.mergeMap(field, record);
-        fieldAndRecord = MapUtil.resolveReference(fieldAndRecord);
-        this.update(recordIndex,fieldAndRecord);
+
+
+    private void initFieldAndIndex(List<String> fields){
+        fieldsAndIndex = new LinkedHashMap<String, Integer>(fields.size());
+        int index = 0;
+        for(String field : fields){
+            fieldsAndIndex.put(field, index++);
+        }
+    }
+
+    /**
+     * check field number and record number for equality
+     * @param fieldNum
+     * @param records
+     */
+    private void check(int fieldNum, List<ArrayList<String>> records){
+        Set<Integer> providedFieldNum = new HashSet<Integer>();
+        for(List<String> record : records){
+            providedFieldNum.add(record.size());
+        }
+        if(providedFieldNum.size() != 1 || !providedFieldNum.contains(fieldNum) || records.size() == 0){
+            throw new RuntimeException("Field or record number not right.");
+        }
+
     }
 }

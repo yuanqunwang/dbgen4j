@@ -10,7 +10,7 @@ public class TableBundleFactoryTest {
     private TableBundleFactory tableBundleFactory;
 
     @Before
-    public void initFildsAnddirectives(){
+    public void initFieldsAddictive(){
         Map<String, String> fieldsAndDirectives = new LinkedHashMap<String, String>();
         fieldsAndDirectives.put("name","#{Name.name}");
         fieldsAndDirectives.put("phoneNumber", "#{phoneNumber.cellPhone}");
@@ -24,7 +24,7 @@ public class TableBundleFactoryTest {
         fd2.put("app", "#{app.name}-#{phoneNumber.cellPhone}-@{name}");
         fd3.put("university", "#{university.name}-@{phoneNumber}");
 
-        Map<String, Map<String, String>> nameFieldDirective = new HashMap<String, Map<String, String>>(3);
+        Map<String, Map<String, String>> nameFieldDirective = new LinkedHashMap<String, Map<String, String>>(3);
         nameFieldDirective.put("table1", fd1);
         nameFieldDirective.put("table2", fd2);
         nameFieldDirective.put("table3", fd3);
