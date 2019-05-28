@@ -33,7 +33,7 @@ public class TableBundleFactory {
     private void makeCommonFieldSameAndResolveReference(List<Table> tableList, int recordLen){
         Map<String, String> commonFieldAndDirective = this.tableSeedBundle.getCommonFieldAndDirective();
         for(int i = 0; i < recordLen; i++){
-        Map<String, String> commonFieldAndValue = FakerUtil.genFakeKeyValueMap(commonFieldAndDirective);
+            Map<String, String> commonFieldAndValue = FakerUtil.genFakeKeyValueMap(commonFieldAndDirective);
             for(Table table : tableList){
                 table.updateRecord(i, commonFieldAndValue);
                 table.resolveReference(i);

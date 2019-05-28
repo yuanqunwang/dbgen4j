@@ -7,13 +7,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapUtil {
+    /*
+     * field reference regex pattern.
+     */
+    private static Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9_]+)\\}");
+
+
     /**
      * a key's value determined by other key's value
      * key reference have the form of '@{referencedKey1}'
      * after resolving, this function will return value of the reference key combined.
      */
     public static String resolveFieldReference(Map<String, String> keyValue, String reference){
-        Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9]+)\\}");
         Matcher matcher = referencePattern.matcher(reference);
         while(matcher.find()){
             String referencedKey = matcher.group(1);
@@ -36,7 +41,6 @@ public class MapUtil {
      * resolve all the reference and update corresponding value
      */
     public static Map<String, String> resolveReference(Map<String, String> keyValue){
-        Pattern referencePattern = Pattern.compile("@\\{([a-zA-Z0-9]+)\\}");
         Set<String> keySet = keyValue.keySet();
         for(String key : keySet){
             String value = keyValue.get(key);
